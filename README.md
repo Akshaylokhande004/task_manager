@@ -1,5 +1,8 @@
 # 🚀 Task Manager Backend API
+## 📽️ Demo Video
+👉[ https://drive.google.com/drive/folders/1s-7Qtp5iYJi4LIWKrbBt73SIoHEQ6evH?usp=sharing](https://drive.google.com/file/d/1Pq7MPWXg5kvBGHOn4ZqX_sj6yUtyWkYY/view?usp=sharing)
 
+---
 ## 📌 Overview
 A production-ready backend API for a task management system built with a focus on scalability, clean architecture, and real-world backend practices.
 
@@ -237,15 +240,12 @@ Example:
 ---
 
 ## 🧪 Demo Credentials
-Email: akshay96@gmail.com  
-Password: password  
+Email: Can Register
+Password:  Can Register 
 
 ---
 
-## 📽️ Demo Video
-👉 https://drive.google.com/drive/folders/1s-7Qtp5iYJi4LIWKrbBt73SIoHEQ6evH?usp=sharing
 
----
 
 ## 🎯 Design Decisions
 
@@ -269,14 +269,12 @@ Password: password
 
 ## 🚀 Future Improvements
 - Unit & integration testing  
-- Role-based access control (RBAC)  
-- Queue system (BullMQ) for production reminders  
+- Role-based access control (RBAC)    
 - Docker deployment  
 
 ---
 
-## 👤 Author
-Developed by Akshay Lokhande  
+
 
 ---
 
