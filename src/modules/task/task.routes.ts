@@ -6,6 +6,7 @@ import {
   getById,
   update,
   remove,
+  getTags,
 } from "./task.controller";
 
 const router = Router();
@@ -21,17 +22,16 @@ router.use(authMiddleware);
  * @swagger
  * /tasks:
  *   post:
- *     summary: Create a task
+ *     summary: Create a new task
  *     tags: [Tasks]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [title]
+ *             required:
+ *               - title
  *             properties:
  *               title:
  *                 type: string
@@ -39,6 +39,15 @@ router.use(authMiddleware);
  *                 type: string
  *               dueDate:
  *                 type: string
+ *                 example: 2026-04-20T10:00:00.000Z
+ *               category:
+ *                 type: string
+ *                 example: Work
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["Backend", "Urgent"]
  *     responses:
  *       201:
  *         description: Task created
@@ -49,10 +58,8 @@ router.post("/", create);
  * @swagger
  * /tasks:
  *   get:
- *     summary: Get all tasks
+ *     summary: Get all tasks with filtering
  *     tags: [Tasks]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -70,11 +77,30 @@ router.post("/", create);
  *         name: search
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: tag
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: List of tasks
+ *         description: Tasks fetched successfully
  */
 router.get("/", getAll);
+/**
+ * @swagger
+ * /tasks/tags:
+ *   get:
+ *     summary: Get all unique tags
+ *     tags: [Tasks]
+ *     responses:
+ *       200:
+ *         description: List of tags
+ */
+router.get("/tags", getTags);
 
 /**
  * @swagger
@@ -102,14 +128,10 @@ router.get("/:id", getById);
  *   patch:
  *     summary: Update task
  *     tags: [Tasks]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
  *     requestBody:
  *       content:
  *         application/json:
@@ -118,10 +140,18 @@ router.get("/:id", getById);
  *             properties:
  *               title:
  *                 type: string
- *               description:
- *                 type: string
  *               status:
  *                 type: string
+ *                 example: completed
+ *               dueDate:
+ *                 type: string
+ *                 example: 2026-04-20T10:00:00.000Z
+ *               category:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *     responses:
  *       200:
  *         description: Task updated
@@ -134,18 +164,17 @@ router.patch("/:id", update);
  *   delete:
  *     summary: Delete task
  *     tags: [Tasks]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
  *     responses:
  *       200:
  *         description: Task deleted
  */
 router.delete("/:id", remove);
+
+
+
 
 export default router;

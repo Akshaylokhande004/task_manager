@@ -6,6 +6,8 @@ export interface ITask extends Document {
   dueDate?: Date;
   status: "pending" | "completed";
   userId: string;
+  category?: "Work" | "Personal" | "Urgent";
+  tags?: string[];
 }
 
 const taskSchema = new Schema<ITask>(
@@ -18,6 +20,16 @@ const taskSchema = new Schema<ITask>(
       enum: ["pending", "completed"],
       default: "pending"
     },
+    category:{
+        type: String,
+        enum: ["Work", "Personal", "Urgent"],
+        default: "other"
+    },
+    tags: [
+  {
+    type: String,
+  },
+],
     userId: {
       type: String,
       required: true

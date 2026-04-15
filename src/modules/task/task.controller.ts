@@ -5,6 +5,7 @@ import {
   getTaskById,
   updateTask,
   deleteTask,
+  getAllTags,
 } from "./task.service";
 
 // CREATE
@@ -16,7 +17,7 @@ export const create = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { title, description, dueDate } = req.body;
+    const { title, description, dueDate, category, tags } = req.body;
 
     if (!title) {
       return res.status(400).json({ message: "Title is required" });
@@ -26,7 +27,10 @@ export const create = async (req: Request, res: Response) => {
       user.userId,
       title,
       description,
-      dueDate
+      dueDate,
+      category,
+      tags
+  
     );
 
     return res.status(201).json(task);
@@ -52,6 +56,15 @@ export const getAll = async (req: Request, res: Response) => {
       typeof req.query.search === "string"
         ? req.query.search
         : undefined;
+    const category =
+       typeof req.query.category === "string"
+         ? req.query.category
+         : undefined;
+
+const tag =
+  typeof req.query.tag === "string"
+    ? req.query.tag
+    : undefined;
 
     const { tasks, total } = await getTasks(
       user.userId,
@@ -135,6 +148,15 @@ export const remove = async (req: Request, res: Response) => {
     await deleteTask(id, user.userId);
 
     return res.json({ message: "Task deleted" });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getTags = async (req: Request, res: Response) => {
+  try{
+    const tags = await getAllTags();
+    return res.json(tags);
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }

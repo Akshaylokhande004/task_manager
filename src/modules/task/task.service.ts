@@ -1,18 +1,26 @@
-import { Task, ITask } from "../../model.ts/task.model";
+import { Task, ITask } from "../../model/task.model";
+import { scheduleReminder,cancelReminder } from "../../utils/taskReminder";
+import { sendWebhook } from "../../utils/webhook";
 
 // CREATE
 export const createTask = async (
   userId: string,
   title: string,
   description?: string,
-  dueDate?: Date
+  dueDate?: Date,
+   category?: string,
+  tags?: string[]
 ) => {
-  return await Task.create({
+  const task=  await Task.create({
     title,
     description,
     dueDate,
     userId,
+    category,
+    tags
   });
+  scheduleReminder(task);
+  return task;
 };
 
 // GET ALL (with pagination + filter + search)
@@ -21,20 +29,31 @@ export const getTasks = async (
   page: number,
   limit: number,
   status?: string,
-  search?: string
+  search?: string,
+  category?: string,
+  tags?: string[]
+  
 ) => {
   const skip = (page - 1) * limit;
 
   const query: any = { userId };
-
+  // status filter
   if (status) {
     query.status = status;
   }
-
+   // search filter  
   if (search) {
     query.title = {
       $regex: search,
       $options: "i", // case-insensitive
+    };
+  }
+  if(category){
+    query.category = category;
+  }
+   if (tags) {
+    query.tags = {
+      $in: [tags],
     };
   }
 
@@ -63,19 +82,47 @@ export const getTaskById = async (
 export const updateTask = async (
   taskId: string,
   userId: string,
-  data: Partial<ITask>
+  data: any
 ) => {
-  const task = await Task.findOneAndUpdate(
-    { _id: taskId, userId },
-    data,
-    { new: true }
-  );
+  const task = await Task.findOne({
+    _id: taskId,
+    userId,
+  });
 
   if (!task) {
-    throw new Error("Task not found or unauthorized");
+    throw new Error("Task not found");
   }
 
-  return task;
+  //  Check BEFORE update
+  const wasCompleted = task.status === "completed";
+
+  // Apply updates
+  Object.assign(task, data);
+
+  const updatedTask = await task.save();
+  //  cancel reminder if completed
+  if (updatedTask.status === "completed") {
+    cancelReminder(updatedTask._id.toString());
+  }
+  // reschedule reminder if dueDate changed and task is still pending
+   if (data.dueDate) {
+    scheduleReminder(updatedTask);
+  }
+
+  //  Check AFTER update
+  const isNowCompleted = updatedTask.status === "completed";
+
+  //  Trigger webhook ONLY when status changes to completed
+  if (!wasCompleted && isNowCompleted) {
+    await sendWebhook({
+      taskId: updatedTask._id,
+      title: updatedTask.title,
+      userId: updatedTask.userId,
+      completedAt: new Date(),
+    });
+  }
+  scheduleReminder(updatedTask);
+  return updatedTask;
 };
 
 // DELETE
@@ -91,7 +138,7 @@ export const deleteTask = async (
   if (!task) {
     throw new Error("Task not found or unauthorized");
   }
-
+  cancelReminder(taskId);
   return task;
 };
 
@@ -115,4 +162,8 @@ export const toggleTask = async (
   await task.save();
 
   return task;
+};
+
+export const getAllTags = async () => {
+  return await Task.distinct("tags");
 };
